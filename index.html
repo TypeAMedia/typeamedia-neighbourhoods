@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Appealing Neighbourhood</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css">
+  <link rel="stylesheet" href="./main.css">
+</head>
+
+<body>
+  <div class="container">
+    <div class="heading">
+      <img src="./images/logo.svg" alt="logo" />
+      <div class="header-text">The Neighbourhood Appeal Index</div>
+      <div class="header-desc">We analysed neighbourhoods and regions across England to identify <br /> which areas
+        offer the
+        strongest overall appeal for homebuyers. </div>
+    </div>
+    <div id="map">
+      <div class="map-toolbar">
+        <select id="region-select" class="region-select" aria-label="Select region"></select>
+      </div>
+
+      <div class="map-legend" aria-label="Map colour scale">
+        <span class="map-legend-low">Least appealing</span>
+        <div class="map-legend-first"> </div>
+        <div class="map-legend-second"> </div>
+        <div class="map-legend-third"> </div>
+        <div class="map-legend-fourth"> </div>
+        <div class="map-legend-fifth"> </div>
+        <div class="map-legend-sixth"> </div>
+        <div class="map-legend-seventh"> </div>
+        <div class="map-legend-eighth"> </div>
+        <div class="map-legend-ninth"> </div>
+        <div class="map-legend-tenth"> </div>
+        <div class="map-legend-eleventh"> </div>
+        <div class="map-legend-twelfth"> </div>
+        <div class="map-legend-thirteenth"> </div>
+        <!-- <div class="map-legend-bar" id="map-legend-bar"></div> -->
+        <span class="map-legend-high">Most appealing</span>
+      </div>
+
+      <div class="map-zoom-controls" role="group" aria-label="Map zoom">
+        <button type="button" class="map-zoom-btn map-zoom-in" aria-label="Zoom in">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8.66841 3.98249e-06C5.85459 -0.00269139 3.21488 1.36294 1.5897 3.66022C-0.0346751 5.95753 -0.442557 8.90169 0.4972 11.5538C1.43785 14.206 3.60749 16.2364 6.31643 16.9984C9.02514 17.7603 11.9353 17.1583 14.1203 15.3848L20.1075 21.3719L21.3796 20.0998L15.3925 14.1126C16.7761 12.411 17.4616 10.2466 17.3107 8.0581C17.1597 5.86965 16.184 3.82012 14.5794 2.3242C12.9748 0.828303 10.8626 -0.00271001 8.66864 4.99901e-05L8.66841 3.98249e-06ZM8.66841 15.525C6.84817 15.525 5.10157 14.8018 3.81495 13.5143C2.52748 12.2277 1.80424 10.4811 1.80424 8.66084C1.80424 6.84062 2.52748 5.094 3.81495 3.80738C5.10152 2.51991 6.84819 1.79667 8.66841 1.79667C10.4886 1.79667 12.2353 2.51991 13.5219 3.80738C14.8093 5.09395 15.5326 6.84062 15.5326 8.66084C15.5308 10.4811 14.8067 12.2258 13.5201 13.5125C12.2335 14.7991 10.4886 15.5232 8.66841 15.525Z" fill="#4E4E56"/>
+            <path d="M9.56683 5.211L9.56683 12.111L7.76996 12.111L7.76996 5.211L9.56683 5.211Z" fill="#4E4E56"/>
+            <path d="M5.21838 7.76257H12.1184V9.55945H5.21838V7.76257Z" fill="#4E4E56"/>
+            </svg>
+            
+        </button>
+        <button type="button" class="map-zoom-btn map-zoom-out" aria-label="Zoom out">
+          <svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g clip-path="url(#clip0_1_5363)">
+            <path d="M9.34376 0.682804C6.52994 0.680109 3.89023 2.04574 2.26505 4.34302C0.640679 6.64033 0.232797 9.58449 1.17255 12.2366C2.11321 14.8888 4.28284 16.9192 6.99178 17.6812C9.70049 18.4431 12.6107 17.8411 14.7957 16.0676L20.7828 22.0547L22.055 20.7826L16.0679 14.7954C17.4514 13.0938 18.137 10.9294 17.986 8.7409C17.8351 6.55245 16.8594 4.50292 15.2548 3.007C13.6501 1.5111 11.538 0.68009 9.34399 0.68285L9.34376 0.682804ZM9.34376 16.2078C7.52352 16.2078 5.77692 15.4846 4.4903 14.1971C3.20283 12.9105 2.4796 11.1639 2.4796 9.34364C2.4796 7.52342 3.20283 5.7768 4.4903 4.49018C5.77688 3.20271 7.52354 2.47947 9.34376 2.47947C11.164 2.47947 12.9106 3.20271 14.1972 4.49018C15.4847 5.77675 16.2079 7.52342 16.2079 9.34364C16.2061 11.1639 15.482 12.9086 14.1954 14.1953C12.9089 15.4819 11.164 16.206 9.34376 16.2078Z" fill="#4E4E56"/>
+            <path d="M5.89374 8.44537H12.7937V10.2422H5.89374V8.44537Z" fill="#4E4E56"/>
+            </g>
+            <defs>
+            <clipPath id="clip0_1_5363">
+            <rect width="23" height="23" fill="white"/>
+            </clipPath>
+            </defs>
+            </svg>
+            
+        </button>
+      </div>
+    </div>
+    <div class="rank-table-wrap" aria-label="Neighbourhood ranks table">
+      <div id="rank-table"></div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js"></script>
+  <script src="./map.js"></script>
+</body>
+
+</html>
