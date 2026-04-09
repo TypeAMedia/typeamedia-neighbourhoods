@@ -424,7 +424,7 @@ body {
   max-height: min(400px, 78vh);
   -webkit-overflow-scrolling: touch;
   background: #b9b9c6;
-  padding: 0 0 16px;
+  /* padding: 0 0 16px; */
   box-sizing: border-box;
 }
 
