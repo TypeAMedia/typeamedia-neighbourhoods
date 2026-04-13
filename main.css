@@ -159,7 +159,7 @@ body {
 }
 
 #map .map-layer path {
-  stroke: #ffffff;
+  stroke: #000;
   stroke-width: 0.35;
 }
 
@@ -460,8 +460,7 @@ body {
 .rank-table-th-inner {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 6px;
   min-height: 3.25rem;
 }
@@ -474,14 +473,33 @@ body {
 
 .rank-table-th-icon {
   display: block;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
   flex-shrink: 0;
 }
 
 .rank-table-th-label {
   display: block;
+}
+
+.rank-table-th-sortable {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.rank-table-th-sortable:hover {
+  background: #5c5d68;
+}
+
+.rank-table-th-sortable:focus {
+  outline: none;
+}
+
+.rank-table-th-sortable:focus-visible {
+  outline: 2px solid #e8e4d4;
+  outline-offset: -2px;
 }
 
 .rank-table thead th:first-child {
@@ -525,16 +543,21 @@ body {
   color: #646d76;
 }
 
-.rank-table tbody tr:first-child td.rank-table-rank,
-.rank-table tbody tr:first-child td.rank-table-rank .rank-table-cell-value {
-  color: #a08f61;
-}
-
-.rank-table tbody tr:nth-child(even) td {
+/* Alternating row backgrounds follow visible rows when the region filter is active. */
+.rank-table tbody tr.rank-table-band-b td {
   background: #f7f7f9;
 }
 
-.rank-table tbody tr:first-child td {
+.rank-table tbody tr.rank-table-band-a td {
+  background: #ffffff;
+}
+
+.rank-table tbody tr.rank-table-first-row td.rank-table-rank,
+.rank-table tbody tr.rank-table-first-row td.rank-table-rank .rank-table-cell-value {
+  color: #a08f61;
+}
+
+.rank-table tbody tr.rank-table-first-row td {
   background: #ddd6bf;
 }
 
@@ -557,8 +580,6 @@ body {
   }
 
   .container {
-    /* padding-left: 12px;
-    padding-right: 12px; */
     box-sizing: border-box;
   }
 
@@ -567,12 +588,12 @@ body {
   }
 
   .header-text {
-    font-size: clamp(1.35rem, 6.5vw, 2.75rem);
+    font-size: 18px;
     line-height: 1.1;
   }
 
   .header-desc {
-    font-size: 14px;
+    font-size: 12px;
     line-height: 1.45;
   }
 
@@ -668,8 +689,9 @@ body {
 
   .rank-table thead th:nth-child(2),
   .rank-table tbody td:nth-child(2) {
-    min-width: 148px;
-    max-width: 220px;
+    width: 150px;
+    /* min-width: 148px;
+    max-width: 220px; */
     box-sizing: border-box;
   }
 
@@ -723,14 +745,6 @@ body {
     font-weight: 700;
     color: #3a3d45;
     font-size: 13px;
-  }
-
-  .rank-table tbody tr:nth-child(even):not(:first-child) td {
-    background: #f7f7f9;
-  }
-
-  .rank-table tbody tr:nth-child(odd):not(:first-child) td {
-    background: #ffffff;
   }
 
   .map-legend-first {
@@ -824,6 +838,14 @@ body {
     writing-mode: horizontal-tb;
     transform: none;
     padding: 5px;
+  }
+
+  .rank-table-th-icon {
+    display: block;
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    flex-shrink: 0;
   }
 
 }

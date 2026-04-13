@@ -31,6 +31,11 @@
     return abs + 'th'
   }
 
+  function normalizeAuthorityName(s) {
+    if (!s) return ''
+    return String(s).trim().toLowerCase().replace(/\s+/g, ' ')
+  }
+
   async function init() {
     var el = document.getElementById('map')
     if (!el) return
@@ -41,7 +46,7 @@
     var height =     window.innerWidth > 760 ? 700 : 1000
 
     var loaded = await Promise.all([
-      fetch('./data/uk-counties.json').then(function (r) {
+      fetch('./data/administrative.json').then(function (r) {
         if (!r.ok) throw new Error('Failed to load map data')
         return r.json()
       }),
@@ -87,11 +92,40 @@
     })
 
     // ---- table (below map) ----
+    var syncRankTableRegionFilter = function () {}
     var tableHost = document.getElementById('rank-table')
     if (tableHost) {
-      var sorted = authorityRows.slice().sort(function (a, b) {
-        return a.rank - b.rank
-      })
+      var sortState = { key: 'displayRank', dir: 1 }
+
+      function tableSortValue(row, key) {
+        if (key === 'nameRegion') return String(row.name || '').toLowerCase()
+        if (key === 'displayRank') {
+          return row.displayRank != null ? row.displayRank : Number.POSITIVE_INFINITY
+        }
+        var v = row[key]
+        return v != null ? v : Number.POSITIVE_INFINITY
+      }
+
+      function computeSortedTableRows() {
+        var key = sortState.key
+        var dir = sortState.dir
+        return authorityRows.slice().sort(function (a, b) {
+          var va = tableSortValue(a, key)
+          var vb = tableSortValue(b, key)
+          if (typeof va === 'string') {
+            var sc = va.localeCompare(String(vb), undefined, { sensitivity: 'base' })
+            if (sc !== 0) return dir * sc
+          } else if (va !== vb) {
+            return dir * (va < vb ? -1 : 1)
+          }
+          if (a.rank !== b.rank) return a.rank - b.rank
+          return String(a.name || '').localeCompare(String(b.name || ''), undefined, {
+            sensitivity: 'base'
+          })
+        })
+      }
+
+      var sorted = computeSortedTableRows()
 
       var columns = [
         { key: 'displayRank', label: 'Rank', format: function (v) { return ordinal(v) } },
@@ -143,6 +177,9 @@
         .data(columns)
         .join('th')
         .attr('scope', 'col')
+        .attr('class', 'rank-table-th-sortable')
+        .attr('role', 'columnheader')
+        .attr('tabindex', '0')
         .each(function (c) {
           var th = d3.select(this)
           var inner = th.append('div').attr('class', 'rank-table-th-inner').style('text-align', 'left')
@@ -159,10 +196,17 @@
           inner.append('span').attr('class', 'rank-table-th-label').text(c.label)
         })
 
+      function rowEntityKey(d) {
+        return String(d.name || '') + '\t' + String(d.region || '')
+      }
+
       var tbody = table.append('tbody')
-      var rows = tbody.selectAll('tr').data(sorted).join('tr')
+      var rows = tbody.selectAll('tr').data(sorted, rowEntityKey).join('tr')
 
       rows
+        .attr('data-region', function (d) {
+          return d.region || ''
+        })
         .selectAll('td')
         .data(function (row) {
           return columns.map(function (c) {
@@ -193,6 +237,62 @@
           }
           cell.append('span').attr('class', 'rank-table-cell-value').text(text)
         })
+
+      function updateTableHeaderSortUi() {
+        thead.selectAll('th').each(function (c) {
+          var th = d3.select(this)
+          var active = c.key === sortState.key
+          th.attr('aria-sort', active ? (sortState.dir === 1 ? 'ascending' : 'descending') : null)
+        })
+      }
+
+      function applyTableSort() {
+        sorted = computeSortedTableRows()
+        tbody.selectAll('tr').data(sorted, rowEntityKey).order()
+        var rs = document.getElementById('region-select')
+        syncRankTableRegionFilter(rs ? rs.value : '')
+        updateTableHeaderSortUi()
+      }
+
+      function onTableSortHeader(c) {
+        if (sortState.key === c.key) sortState.dir *= -1
+        else {
+          sortState.key = c.key
+          sortState.dir = 1
+        }
+        applyTableSort()
+      }
+
+      thead
+        .selectAll('th')
+        .on('click', function (event, c) {
+          onTableSortHeader(c)
+        })
+        .on('keydown', function (event, c) {
+          if (event.key !== 'Enter' && event.key !== ' ') return
+          event.preventDefault()
+          onTableSortHeader(c)
+        })
+
+      updateTableHeaderSortUi()
+
+      syncRankTableRegionFilter = function (selectedValue) {
+        var vis = 0
+        tbody.selectAll('tr').each(function (d) {
+          var tr = d3.select(this)
+          var show = !selectedValue || (d && d.region === selectedValue)
+          tr.style('display', show ? null : 'none')
+          tr.attr('aria-hidden', show ? null : 'true')
+          tr.classed('rank-table-band-a', false)
+          tr.classed('rank-table-band-b', false)
+          tr.classed('rank-table-first-row', false)
+          if (!show || !d) return
+          tr.classed('rank-table-first-row', vis === 0)
+          tr.classed(vis % 2 === 0 ? 'rank-table-band-a' : 'rank-table-band-b', true)
+          vis += 1
+        })
+      }
+      syncRankTableRegionFilter('')
     }
 
     var svg = d3
@@ -201,7 +301,7 @@
       .attr('viewBox', '0 0 ' + width + ' ' + height)
       .attr('width', '100%')
       .attr('role', 'img')
-      .attr('aria-label', 'Map of United Kingdom counties')
+      .attr('aria-label', 'Map of United Kingdom local authority districts')
 
     var projection = d3.geoMercator().fitSize([width, height], geo)
     var path = d3.geoPath().projection(projection)
@@ -223,7 +323,32 @@
 
     var featureStats = new Map()
 
+    var authorityByNormalizedName = new Map()
+    authorityRows.forEach(function (row) {
+      authorityByNormalizedName.set(normalizeAuthorityName(row.name), row)
+    })
+
+    var nameMatchedRows = new Set()
+    var nameMatchedFeatureIndices = new Set()
+    geo.features.forEach(function (feature, i) {
+      var props = feature.properties
+      var lad = props && props.LAD13NM
+      if (!lad) return
+      var row = authorityByNormalizedName.get(normalizeAuthorityName(lad))
+      if (!row) return
+      featureStats.set(i, {
+        sum: row.rank,
+        count: 1,
+        best: row.rank,
+        bestAuthority: row
+      })
+      nameMatchedRows.add(row)
+      nameMatchedFeatureIndices.add(i)
+    })
+
     authorityRows.forEach(function (d) {
+      if (nameMatchedRows.has(d)) return
+
       var candidatePoints = [
         [d.lon, d.lat],
         [-Math.abs(d.lon), d.lat],
@@ -231,6 +356,7 @@
       ]
 
       for (var i = 0; i < geo.features.length; i++) {
+        if (nameMatchedFeatureIndices.has(i)) continue
         var feature = geo.features[i]
         var contained = candidatePoints.some(function (pt) {
           return d3.geoContains(feature, pt)
@@ -373,6 +499,7 @@
         var region = pathRegionKey(i)
         return region === selectedValue ? 1 : 0.35
       })
+      syncRankTableRegionFilter(selectedValue)
     }
 
     var regionSelect = document.getElementById('region-select')
@@ -422,7 +549,7 @@
 
     var cx = width / 2
     var cy = height / 2
-    var initialMapScale = 1.10
+    var initialMapScale = 1.30
     svg.call(
       zoom.transform,
       d3.zoomIdentity.translate(cx, cy).scale(initialMapScale).translate(-cx, -cy)
@@ -460,7 +587,7 @@
     var m = document.getElementById('map')
     if (m) {
       m.textContent =
-        'Could not load map data. Serve this folder over HTTP (e.g. npx serve) so uk-counties.json can be fetched.'
+        'Could not load map data. Serve this folder over HTTP (e.g. npx serve) so administrative.json can be fetched.'
     }
   })
 })()
