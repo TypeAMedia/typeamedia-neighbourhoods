@@ -380,48 +380,10 @@
       }
     })
 
-    var authorityPoints = authorityRows.map(function (d) {
-      var projected = projection([-Math.abs(d.lon), d.lat])
-      return {
-        name: d.name,
-        region: d.region,
-        rank: d.rank,
-        displayRank: d.displayRank,
-        x: projected ? projected[0] : null,
-        y: projected ? projected[1] : null
-      }
-    })
-
-    var nearestFallbackByFeature = new Map()
-
-    geo.features.forEach(function (feature, i) {
-      if (featureStats.has(i)) return
-
-      var centroid = path.centroid(feature)
-      if (!centroid || !Number.isFinite(centroid[0]) || !Number.isFinite(centroid[1])) return
-
-      var nearest = null
-      var minDistSq = Number.POSITIVE_INFINITY
-
-      authorityPoints.forEach(function (p) {
-        if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) return
-        var dx = centroid[0] - p.x
-        var dy = centroid[1] - p.y
-        var distSq = dx * dx + dy * dy
-        if (distSq < minDistSq) {
-          minDistSq = distSq
-          nearest = p
-        }
-      })
-
-      if (nearest) nearestFallbackByFeature.set(i, nearest)
-    })
-
     function pathRegionKey(index) {
       var stat = featureStats.get(index)
       if (stat && stat.bestAuthority) return stat.bestAuthority.region
-      var nearest = nearestFallbackByFeature.get(index)
-      return nearest ? nearest.region : null
+      return null
     }
 
     var mapLayer = svg.append('g').attr('class', 'map-layer')
@@ -457,12 +419,9 @@
       .attr('d', path)
       .style('fill', function (_, i) {
         var stat = featureStats.get(i)
-        if (stat) {
-          var avgRank = stat.sum / stat.count
-          return getColorForRank(avgRank)
-        }
-        var nearest = nearestFallbackByFeature.get(i)
-        return nearest ? getColorForRank(nearest.rank) : '#d8d8d8'
+        if (!stat) return '#d8d8d8'
+        var avgRank = stat.sum / stat.count
+        return getColorForRank(avgRank)
       })
       .on('mouseenter', function (event, d) {
         var featureIndex = geo.features.indexOf(d)

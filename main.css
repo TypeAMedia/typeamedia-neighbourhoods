@@ -159,12 +159,13 @@ body {
 }
 
 #map .map-layer path {
-  stroke: #000;
-  stroke-width: 0.35;
+  stroke: #ffffff;
+  stroke-width: 0.15;
 }
 
 #map .map-layer path:hover {
-  stroke: #d0d0d0;
+  stroke: #ffffff;
+  stroke-width: 0.25;
 }
 
 #map .map-tooltip {
@@ -460,6 +461,7 @@ body {
 .rank-table-th-inner {
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
   gap: 6px;
   min-height: 3.25rem;
@@ -481,6 +483,7 @@ body {
 
 .rank-table-th-label {
   display: block;
+  text-align: center;
 }
 
 .rank-table-th-sortable {
@@ -689,7 +692,7 @@ body {
 
   .rank-table thead th:nth-child(2),
   .rank-table tbody td:nth-child(2) {
-    width: 150px;
+    width: 130px;
     /* min-width: 148px;
     max-width: 220px; */
     box-sizing: border-box;
@@ -842,10 +845,14 @@ body {
 
   .rank-table-th-icon {
     display: block;
-    width: 18px;
-    height: 18px;
+    width: 15px;
+    height: 15px;
     object-fit: contain;
     flex-shrink: 0;
+  }
+
+  .main-logo {
+    width: 200px;
   }
 
 }
