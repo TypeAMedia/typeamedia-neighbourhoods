@@ -484,7 +484,9 @@
         searchPlaceholderValue: 'Search region…',
         shouldSort: false,
         itemSelectText: '',
-        allowHTML: false
+        allowHTML: false,
+        // Tighten fuzzy matching so "south" does not return "North" options.
+        fuseOptions: { includeScore: true, threshold: 0.2 }
       })
       regionSelect.addEventListener('change', function () {
         applyRegionFilter(regionSelect.value)
